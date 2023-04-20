@@ -1,0 +1,13 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/x86_IRVINE/.vs/x86_IRVINE/v16
+/x86_IRVINE/Chap03/Debug
+/x86_IRVINE/Chap03/Chap03.vcxproj.user
+/x86_IRVINE/Chap03/Chap03.vcxproj.filters
+/x86_IRVINE/Chap03/Chap03.vcxproj
+/x86_IRVINE/Chap04/Debug
+/x86_IRVINE/Chap04/Chap04.vcxproj.user
+/x86_IRVINE/Chap04/Chap04.vcxproj.filters
+/x86_IRVINE/Chap04/Chap04.vcxproj
