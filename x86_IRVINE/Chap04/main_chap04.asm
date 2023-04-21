@@ -43,7 +43,29 @@ matrix2             EQU     <10 * 10>              ; text 10*10
     sum             DWORD   0
     sum2            DWORD   0
     sum3            DWORD   0
+
+    ; Create user-defined types.
+    PBYTE           TYPEDEF PTR BYTE ; pointer to bytes
+    PWORD           TYPEDEF PTR WORD ; pointer to words
+    PDWORD          TYPEDEF PTR DWORD ; pointer to doublewords
+
+    marrayB         BYTE 10h,20h,30h
+    marrayW         WORD 1,2,3
+    marrayD         DWORD 4,5,6
+    ; Create some pointer variables.
+    ptr1            PBYTE marrayB
+    ptr2            PWORD marrayW
+    ptr3            PDWORD marrayD
+
+    arrayLoop       DWORD   4, 5, 4, 5 DUP(1)
+
+    stringSource    BYTE    "khong bao gio bo tay", 0
+    stringDest      BYTE    SIZEOF stringSource DUP(3)
+    ptrSource       PBYTE   stringSource
+    ptrDest         PBYTE   stringDest
  
+    one             WORD        8002h
+    two             WORD        4321h
 .code
 main PROC  
 
@@ -192,15 +214,98 @@ main PROC
         add eax,arrayDD[esi + 4]
         add eax,arrayDD[esi + 8]
         mov sum3,eax
-
-
-
+         
         mov esi,3 ; subscript
         mov eax,arrayDD[esi*TYPE arrayDD] ; EAX = 4
+        mov eax,arrayDD[esi*TYPE arrayDD] ; EAX = 4
+
+        ; summing an array using loop
+        ; arrayLoop DWORD 4, 5, 4, 5 DUP(10)
+        mov edi, OFFSET arrayLoop           ; edi = address of the array
+        mov ecx, LENGTHOF arrayLoop         ; exc = loop count
+        mov eax, 0                          ; som = 0
+L0:                                         ; loop label
+        add eax, [edi]                      ; add array item to eax
+        add edi, TYPE arrayLoop             ; pointer to the next element
+        loop L0
 
 
 
 
+
+
+        ; copy a string
+        ; dest string must large enough to store string tobe copy
+        ; stringSource    BYTE    "khong bao gio bo tay", 0
+        ; stringDest      BYTE    SIZEOF stringSource DUP(3)
+        mov esi, OFFSET stringSource
+        mov edi, OFFSET stringDest
+        mov ecx, LENGTHOF stringSource
+
+_Loop_CPY_STR:
+        mov al,[esi]
+        mov [edi],al
+        add esi,1
+        add edi,1
+        loop _Loop_CPY_STR
+
+
+
+        ; better way to copy string: indexed addressing
+        mov edi,0
+        mov ecx,SIZEOF stringSource
+L1:
+        mov al,stringSource[edi]
+        mov stringDest[edi],al
+        inc edi
+        loop L1
+
+
+
+        ; using pointer to copy string
+        ; ptrSource       PTR BYTE stringSource    
+        ; ptrDest         PTR BYTE stringDest
+        mov ecx, SIZEOF stringSource
+        mov esi,ptrSource
+        mov edi,ptrdest
+        ; ptrSource       PBYTE   stringSource
+        ; ptrDest         PBYTE   stringDest
+L2:  
+        mov al, [esi]
+        mov [edi], al
+        inc esi 
+        inc edi 
+        loop L2
+
+        ; chap 4 7th edition excercise
+        ; 4.9.1
+        ; 1
+        ; one             WORD        8002h
+        ; two             WORD        4321h
+        mov edx,21348041h
+        movsx edx,one       ; (a) FFFF8002h
+        movsx edx,two       ; (b) 00004321h
+
+        ; 2
+        mov eax,1002FFFFh
+        inc ax              ; eax = 10020000h
+
+        ; 3
+        mov eax,30020000h
+        dec ax              ; eax = 3002FFFFh
+
+        ; 4
+        mov eax,1002FFFFh
+        neg ax              ; eax = 10020001h
+
+        ; 5
+        mov al,1
+        add al,3            ; Parity flag = 0
+
+        ; 6
+        mov eax,5
+        sub eax,6
+ 
      INVOKE ExitProcess, eax
 main ENDP
 
