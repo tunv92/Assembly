@@ -66,6 +66,20 @@ matrix2             EQU     <10 * 10>              ; text 10*10
  
     one             WORD        8002h
     two             WORD        4321h
+
+    dVal2           DWORD 12345678h
+    dVal3           DWORD ?
+
+    var1            SBYTE -4,-2,3,1
+    var2            WORD 1000h,2000h,3000h,4000h
+    var3            SWORD -16,-42
+    var4            DWORD 1,2,3,4,5
+
+    str1            BYTE    "Khong bao gio bo tay", 0
+    intNum          DWORD   88
+    str2            BYTE    "Khong bao gio bo tay 2", 0
+    strstr2         BYTE    (SIZEOF str1 + SIZEOF str2) DUP(0)
+    total           DWORD   0
 .code
 main PROC  
 
@@ -283,29 +297,108 @@ L2:
         ; one             WORD        8002h
         ; two             WORD        4321h
         mov edx,21348041h
-        movsx edx,one       ; (a) FFFF8002h
-        movsx edx,two       ; (b) 00004321h
+        movsx edx,one           ; (a) FFFF8002h
+        movsx edx,two           ; (b) 00004321h
 
         ; 2
         mov eax,1002FFFFh
-        inc ax              ; eax = 10020000h
+        inc ax                  ; eax = 10020000h
 
         ; 3
         mov eax,30020000h
-        dec ax              ; eax = 3002FFFFh
+        dec ax                  ; eax = 3002FFFFh
 
         ; 4
         mov eax,1002FFFFh
-        neg ax              ; eax = 10020001h
+        neg ax                  ; eax = 10020001h
 
         ; 5
         mov al,1
-        add al,3            ; Parity flag = 0
+        add al,3                ; Parity flag = 0
 
         ; 6
         mov eax,5
-        sub eax,6
- 
+        sub eax,6               ; eax = FFFFFFFFh; sign flag = 1
+
+        ; 7
+        mov al,-1
+        add al,130
+
+        ; 8 and 9 is for 64 bit
+
+        ; 10
+        ; dVal2 DWORD 12345678h
+        mov ax,3
+        mov WORD PTR dVal2+2,ax
+        mov eax,dVal2           ; eax = 00035678h
+
+        ; 11
+        ; .dVal DWORD ?
+        mov dVal,12345678h
+        mov ax,WORD PTR dVal+2
+        add ax,3
+        mov WORD PTR dVal,ax
+        mov eax,dVal            ; eax = 12341237h
+
+        ; var1 SBYTE -4,-2,3,1
+        ; var2 WORD 1000h,2000h,3000h,4000h
+        ; var3 SWORD -16,-42
+        ; var4 DWORD 1,2,3,4,5
+
+        ; 16
+        ;mov ax,var1?           ; invalid: no var1?  
+        mov ax,var2             ; valid
+        ;mov eax,var3           ; invalid: size miss match
+        ;mov var2,var3          ; invalid: both memory operands
+        ;movzx ax,var2          ; invalid: var2 mush be half size of ax
+        ;movzx var2,al          ; invalid: first operand must be reg
+        ;mov ds,ax               ; valid but Exception will occur, in protected mode, you can not edit ds
+        ;mov ds,1000h           ; invalid: immediate can not use to segment reg 
+  
+        ; 17
+        mov al,var1             ; al = -4
+        mov ah,[var1+3]         ; al = 1
+
+        ; 18
+        mov ax,var2             ; ax = 1000h
+        mov ax,[var2+4]         ; ax = 3000h
+        mov ax,var3             ; ax = -16
+        mov ax,[var3-2]         ; ax = 4000h
+
+        ; 19
+        mov     edx,var4        ; edx = 1
+        movzx   edx,var2        ; edx = 00001000h
+        mov     edx,[var4+4]    ; edx = 2
+        movsx   edx,var1        ; edx = fffffffch
+
+
+
+        
+    ; Concat string
+    mov total,SIZEOF strstr2
+    mov ecx, SIZEOF str1
+    mov esi, 0
+
+Ll2:
+    mov al, str1[esi]
+    mov strstr2[esi], al
+    inc esi
+    loop Ll2
+
+    mov ecx, SIZEOF str2
+    mov edi, 0
+
+Ll3:
+    mov al, str2[edi]
+    mov strstr2[esi], al
+    inc esi
+    inc edi
+    loop Ll3
+
+
+    ; End concat string
+
+
      INVOKE ExitProcess, eax
 main ENDP
 
